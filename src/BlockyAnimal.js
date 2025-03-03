@@ -432,7 +432,7 @@ function addActionsfromHtmlUI() {
   document.getElementById("dayButton").addEventListener("click", function () {
     document.getElementById("timeSlider").value = 720;
     document.getElementById("timeDisplay").textContent = 720;
-    updateGameTime(1200);
+    updateGameTime(720);
   });
 
   document.getElementById("nightButton").addEventListener("click", function () {
