@@ -674,6 +674,7 @@ function tick() {
   }
 
   updateAnimationAngle();
+  updateSunPosition();
   updateFlashlight();
 
   renderAllShapes();
@@ -719,6 +720,47 @@ function tick() {
   lightLamp.render();
 
   requestAnimationFrame(tick);
+}
+
+function clamp(val, min, max) {
+  return Math.max(min, Math.min(max, val));
+}
+
+// Computes the sun’s position based on the current game time and camera position.
+// We assume gameTime is in minutes [0, 1440) and that the sun is visible from 6:00 to 18:00.
+function updateSunPosition() {
+  // Compute the fraction of the day (0 to 1)
+  let timeOfDay = gameTime / 1440;
+  // We consider sunrise at 6:00 (0.25) and sunset at 18:00 (0.75).
+  // Normalize the fraction so that t=0 at sunrise and t=1 at sunset.
+  let t = clamp((timeOfDay - 0.25) / 0.5, 0.0, 1.0);
+
+  // Compute an angle along a semicircular arc:
+  // At sunrise (t = 0): angle = PI (sun on the east horizon),
+  // at noon (t = 0.5): angle = PI/2 (sun at peak),
+  // at sunset (t = 1): angle = 0 (sun on the west horizon).
+  let angle = Math.PI * (1 - t);
+
+  // Use the camera position and render distance to determine a radius for the sun’s path.
+  let camPos = camera.getPosition(); // [x, y, z]
+  let renderDistance = camera.getRenderDistance(); // e.g., 20
+  let bufferZone = camera.getBufferZone(); // e.g., 2
+  let skyboxSize = renderDistance - bufferZone; // e.g., 18
+  let radius = skyboxSize / 2; // e.g., 9
+
+  // Compute the sun’s position along a semicircular arc in the X-Y plane (east-west and height).
+  // Here we assume:
+  //   - At sunrise (angle = PI): the sun is to the left of the camera.
+  //   - At noon (angle = PI/2): the sun is directly above (or near the top).
+  //   - At sunset (angle = 0): the sun is to the right.
+  let sunX = camPos[0] + radius * Math.cos(angle);
+  // Adjust the vertical position: base height plus a sinusoidal variation.
+  let sunY = camPos[1] + 2 + 14 * Math.sin(angle);
+  // For a simple 2D effect, keep Z the same as the camera’s.
+  let sunZ = camPos[2];
+
+  // Update the global light position to the computed sun position.
+  g_lightPos = [sunX, sunY, sunZ];
 }
 
 function updateGameTime(newTime) {
