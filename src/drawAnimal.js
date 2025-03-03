@@ -227,13 +227,6 @@ class Animal {
     head2.matrix.scale(0.07, 0.11, 0.11);
     head2.render();
 
-    var dildo = new Cube();
-    dildo.color = [0.62, 0.125, 0.94, 1.0];
-    dildo.matrix.set(headTransform);
-    dildo.matrix.translate(0.06, 0.17, 0.09);
-    dildo.matrix.scale(-0.5, 0.05, 0.05);
-    dildo.render();
-
     var nose = new Cube();
     nose.color = [0, 0, 0, 1];
     nose.matrix.set(headTransform);
